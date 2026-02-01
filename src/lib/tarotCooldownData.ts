@@ -177,11 +177,11 @@ export const TAROT_COOLDOWN_CARDS: TarotCooldownCard[] = [
   },
   {
     index: 8,
-    name: "Strength",
-    imageKey: "the_strength",
+    name: "Justice",
+    imageKey: "justice",
     romanNumber: "VIII",
     hours: 0,
-    minutes: 40,
+    minutes: 48,
     seconds: 0,
     tiers: {
       earlyGame: "A",
@@ -231,11 +231,11 @@ export const TAROT_COOLDOWN_CARDS: TarotCooldownCard[] = [
   },
   {
     index: 11,
-    name: "Justice",
-    imageKey: "justice",
+    name: "Strength",
+    imageKey: "the_strength",
     romanNumber: "XI",
     hours: 0,
-    minutes: 48,
+    minutes: 40,
     seconds: 0,
     tiers: {
       earlyGame: "A",
