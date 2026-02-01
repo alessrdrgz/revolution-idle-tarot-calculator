@@ -1,7 +1,7 @@
 # Tarot Calculator
 
 [![version](https://img.shields.io/badge/version-0.0.1-blue)](./package.json)
-[![game](https://img.shields.io/badge/game-Revolution%20Idle-green)](https://store.steampowered.com/app/521140/Revolution_Idle/)
+[![game](https://img.shields.io/badge/game-Revolution%20Idle-green)](https://store.steampowered.com/app/2763740/Revolution_Idle/)
 [![Astro](https://img.shields.io/badge/Astro-5.17-FF5D01)](https://astro.build)
 
 Web app with calculators for **Revolution Idle**: **Tower** (SMP level), **Cooldown** (tarots cooldowns in real time), and **Death** (refine points).
