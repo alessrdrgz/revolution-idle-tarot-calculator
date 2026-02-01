@@ -1,0 +1,146 @@
+---
+import deathImage from '@/assets/images/tarots/death.webp';
+import TarotCard from '@/components/TarotCard.astro';
+import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+---
+
+<main class="flex flex-row items-start gap-8">
+	<TarotCard image={deathImage} alt="Death Tarot Card" tarotRomanNumber="XII" tarotName="Death" />
+	<div class="flex w-full flex-1 flex-col gap-4">
+		<FieldSet>
+			<FieldLegend>Death calculator</FieldLegend>
+			<FieldGroup>
+				<Field>
+					<FieldLabel for="current-rfp"> Current refine points </FieldLabel>
+					<Input
+						type="text"
+						id="current-rfp"
+						class="w-auto max-w-32"
+						placeholder="1.78e80"
+						data-validate-number
+					/>
+				</Field>
+				<Field>
+					<FieldLabel for="death-boost"> Death boost </FieldLabel>
+					<Input
+						type="text"
+						id="death-boost"
+						class="w-auto max-w-32"
+						placeholder="17.15"
+						data-validate-number
+					/>
+				</Field>
+				<Field>
+					<FieldLabel for="resulting-rfp"> Resulting refine points </FieldLabel>
+					<Input
+						type="text"
+						id="resulting-rfp"
+						class="w-auto max-w-32"
+						placeholder="3.05e81"
+						readonly
+					/>
+				</Field>
+			</FieldGroup>
+		</FieldSet>
+	</div>
+</main>
+
+<script>
+	const $ = (sel: string) => document.querySelector(sel);
+	const $$ = (sel: string) => document.querySelectorAll(sel);
+
+	const NUMBER_REGEX = /^-?\d+(\.\d+)?([eE][-+]?\d+)?$/;
+
+	function isValidNumber(value: string): boolean {
+		if (value.trim() === '') return true;
+		return NUMBER_REGEX.test(value.trim());
+	}
+
+	function validateInput($input: HTMLInputElement) {
+		const $field = $input.closest('[data-slot="field"]');
+		if (!$field) return;
+		const valid = isValidNumber($input.value);
+		if (valid) {
+			$field.removeAttribute('data-invalid');
+		} else {
+			$field.setAttribute('data-invalid', 'true');
+		}
+	}
+
+	function updateResult() {
+		const $currentRfp = $('#current-rfp') as HTMLInputElement | null;
+		const $deathBoost = $('#death-boost') as HTMLInputElement | null;
+		const $result = $('#resulting-rfp') as HTMLInputElement | null;
+		if (!$currentRfp || !$deathBoost || !$result) return;
+
+		const currentRfp = $currentRfp.value.trim();
+		const deathBoost = $deathBoost.value.trim();
+		if (
+			currentRfp === '' ||
+			deathBoost === '' ||
+			!isValidNumber(currentRfp) ||
+			!isValidNumber(deathBoost)
+		) {
+			$result.value = '';
+			return;
+		}
+
+		const product = Number(currentRfp) * Number(deathBoost);
+		$result.value = formatNumber(product);
+	}
+
+	function formatNumber(n: number): string {
+		if (!Number.isFinite(n)) return '';
+		if (Math.abs(n) >= 1e6 || (Math.abs(n) < 1e-3 && n !== 0)) {
+			return n.toExponential(2);
+		}
+		return String(Number(n.toFixed(4)));
+	}
+
+	const DEATH_STORAGE_KEY = 'death-tab-data';
+
+	function saveDeathData() {
+		const $currentRfp = $('#current-rfp') as HTMLInputElement | null;
+		const $deathBoost = $('#death-boost') as HTMLInputElement | null;
+		const currentRfp = $currentRfp?.value ?? '';
+		const deathBoost = $deathBoost?.value ?? '';
+		try {
+			localStorage.setItem(DEATH_STORAGE_KEY, JSON.stringify({ currentRfp, deathBoost }));
+		} catch {
+			/* localStorage unavailable */
+		}
+	}
+
+	function loadDeathData() {
+		try {
+			const raw = localStorage.getItem(DEATH_STORAGE_KEY);
+			if (!raw) return;
+			const data = JSON.parse(raw);
+			const $currentRfp = $('#current-rfp') as HTMLInputElement | null;
+			const $deathBoost = $('#death-boost') as HTMLInputElement | null;
+			if ($currentRfp && data.currentRfp != null) $currentRfp.value = String(data.currentRfp);
+			if ($deathBoost && data.deathBoost != null) $deathBoost.value = String(data.deathBoost);
+		} catch {
+			/* error loading death data */
+		}
+	}
+
+	$$('input[data-validate-number]').forEach(($input) => {
+		const input = $input as HTMLInputElement;
+		input.addEventListener('input', () => {
+			validateInput(input);
+			updateResult();
+			saveDeathData();
+		});
+		input.addEventListener('blur', () => {
+			validateInput(input);
+			saveDeathData();
+		});
+	});
+
+	document.addEventListener('DOMContentLoaded', () => {
+		loadDeathData();
+		updateResult();
+	});
+</script>

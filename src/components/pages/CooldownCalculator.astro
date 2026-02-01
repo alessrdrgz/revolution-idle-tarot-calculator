@@ -1,0 +1,261 @@
+---
+import CdCard from '@/components/CdCard.astro';
+import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select';
+import { Field, FieldLabel } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import { GAME_STAGES, TAROT_COOLDOWN_CARDS } from '@/lib/tarotCooldownData';
+
+import chariot from '@/assets/images/tarots/chariot.webp';
+import death from '@/assets/images/tarots/death.webp';
+import judgement from '@/assets/images/tarots/judgement.webp';
+import justice from '@/assets/images/tarots/justice.webp';
+import temperance from '@/assets/images/tarots/temperance.webp';
+import the_devil from '@/assets/images/tarots/the_devil.webp';
+import the_emperor from '@/assets/images/tarots/the_emperor.webp';
+import the_empress from '@/assets/images/tarots/the_empress.webp';
+import the_fool from '@/assets/images/tarots/the_fool.webp';
+import the_hanged_man from '@/assets/images/tarots/the_hanged_man.webp';
+import the_hermit from '@/assets/images/tarots/the_hermit.webp';
+import the_hierophant from '@/assets/images/tarots/the_hierophant.webp';
+import the_high_priestess from '@/assets/images/tarots/the_high_priestess.webp';
+import the_lovers from '@/assets/images/tarots/the_lovers.webp';
+import the_magician from '@/assets/images/tarots/the_magician.webp';
+import the_moon from '@/assets/images/tarots/the_moon.webp';
+import the_star from '@/assets/images/tarots/the_star.webp';
+import the_strength from '@/assets/images/tarots/the_strength.webp';
+import the_sun from '@/assets/images/tarots/the_sun.webp';
+import the_tower from '@/assets/images/tarots/the_tower.webp';
+import the_world from '@/assets/images/tarots/the_world.webp';
+import wheel_of_fortune from '@/assets/images/tarots/wheel_of_fortune.webp';
+import type { ImageMetadata } from 'astro';
+
+const TAROT_IMAGES: Record<string, ImageMetadata> = {
+	the_fool,
+	the_magician,
+	the_high_priestess,
+	the_empress,
+	the_emperor,
+	the_hierophant,
+	the_lovers,
+	chariot,
+	the_strength,
+	the_hermit,
+	wheel_of_fortune,
+	justice,
+	the_hanged_man,
+	death,
+	temperance,
+	the_devil,
+	the_tower,
+	the_star,
+	the_moon,
+	the_sun,
+	judgement,
+	the_world
+};
+---
+
+<div class="flex flex-col gap-6">
+	<div class="flex flex-row justify-between gap-4">
+		<Field>
+			<FieldLabel for="local-game-speed">Local Game Speed</FieldLabel>
+			<Input
+				type="text"
+				inputmode="decimal"
+				id="local-game-speed"
+				class="w-auto max-w-32"
+				placeholder="5.59"
+				value="5.59"
+				pattern="[0-9]+(\.[0-9]+)?"
+				autocomplete="off"
+			/>
+		</Field>
+		<Field class="max-w-24">
+			<FieldLabel for="time-flux">Time Flux</FieldLabel>
+			<NativeSelect id="time-flux">
+				<NativeSelectOption value="1">1</NativeSelectOption>
+				<NativeSelectOption value="2">2</NativeSelectOption>
+				<NativeSelectOption value="3">3</NativeSelectOption>
+			</NativeSelect>
+		</Field>
+		<Field class="max-w-60">
+			<FieldLabel for="game-stage">Game Stage</FieldLabel>
+
+			<NativeSelect id="game-stage">
+				{
+					GAME_STAGES.map((stage) => (
+						<NativeSelectOption value={stage.value}>{stage.label}</NativeSelectOption>
+					))
+				}
+			</NativeSelect>
+		</Field>
+	</div>
+
+	<div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+		{
+			TAROT_COOLDOWN_CARDS.map((card) => {
+				const image = TAROT_IMAGES[card.imageKey];
+				if (!image) return null;
+				return <CdCard card={card} image={image} />;
+			})
+		}
+	</div>
+</div>
+
+<script>
+	const $ = (sel: string) => document.querySelector(sel);
+	const $$ = (sel: string) => document.querySelectorAll(sel);
+
+	function sanitizeDecimalInput(value: string): string {
+		const digitsAndDot = value.replace(/[^0-9.]/g, '');
+		const parts = digitsAndDot.split('.');
+		if (parts.length <= 2) return digitsAndDot;
+		return parts[0] + '.' + parts.slice(1).join('');
+	}
+
+	function parseIngameTime(value: string): number {
+		const trimmed = value.trim();
+		if (!trimmed) return 0;
+		const parts = trimmed.split(':').map((p) => parseInt(p, 10));
+		if (parts.some((n) => !Number.isFinite(n) || n < 0)) return 0;
+		if (parts.length === 1) return parts[0]!;
+		if (parts.length === 2) return (parts[0] ?? 0) * 60 + (parts[1] ?? 0);
+		return (parts[0] ?? 0) * 3600 + (parts[1] ?? 0) * 60 + (parts[2] ?? 0);
+	}
+
+	function formatRealTime(totalSeconds: number): string {
+		if (!Number.isFinite(totalSeconds) || totalSeconds < 0) return '--:--:--';
+		const h = Math.floor(totalSeconds / 3600);
+		const m = Math.floor((totalSeconds % 3600) / 60);
+		const s = Math.floor(totalSeconds % 60);
+		const pad = (n: number) => n.toString().padStart(2, '0');
+		return `${h}:${pad(m)}:${pad(s)}`;
+	}
+
+	const TIER_CLASS: Record<string, string> = {
+		'S++': 'tier-spp',
+		'S+': 'tier-sp',
+		A: 'tier-a',
+		B: 'tier-b',
+		C: 'tier-c',
+		F: 'tier-f'
+	};
+
+	function updateAllCards() {
+		const $gameSpeed = $('#local-game-speed') as HTMLInputElement | null;
+		const $timeFlux = $('#time-flux') as HTMLSelectElement | null;
+		const $gameStage = $('#game-stage') as HTMLSelectElement | null;
+		if (!$gameSpeed || !$timeFlux || !$gameStage) return;
+
+		const gameSpeed = Number($gameSpeed.value) || 1;
+		const timeFlux = Number($timeFlux.value) || 1;
+		const gameStage = $gameStage.value;
+
+		$$('[data-cd-card]').forEach(($card) => {
+			const $ingame = $card.querySelector('.cd-ingame-input') as HTMLInputElement | null;
+			const ingameSeconds = $ingame ? parseIngameTime($ingame.value) : 0;
+			const tiersJson = ($card as HTMLElement).dataset.tiers;
+			const $realTime = $card.querySelector('.cd-real-time');
+			const $tier = $card.querySelector('.cd-tier');
+
+			const realTimeSeconds = ingameSeconds / (gameSpeed * timeFlux);
+			if ($realTime) $realTime.textContent = formatRealTime(realTimeSeconds);
+
+			if ($tier && tiersJson) {
+				try {
+					const tiers = JSON.parse(tiersJson);
+					const tier = tiers[gameStage] || '-';
+					$tier.textContent = tier;
+					$tier.classList.remove('tier-spp', 'tier-sp', 'tier-a', 'tier-b', 'tier-c', 'tier-f');
+					if (TIER_CLASS[tier]) $tier.classList.add(TIER_CLASS[tier]);
+				} catch {
+					$tier.textContent = '-';
+				}
+			}
+		});
+	}
+
+	const CD_STORAGE_KEY = 'cd-tab-data';
+
+	function saveCdData() {
+		const $gameSpeed = $('#local-game-speed') as HTMLInputElement | null;
+		const $timeFlux = $('#time-flux') as HTMLSelectElement | null;
+		const $gameStage = $('#game-stage') as HTMLSelectElement | null;
+		const $$ingame = $$('.cd-ingame-input');
+		const data = {
+			localGameSpeed: $gameSpeed?.value ?? '',
+			timeFlux: $timeFlux?.value ?? '1',
+			gameStage: $gameStage?.value ?? '',
+			ingameTimes: Array.from($$ingame).map((i) => (i as HTMLInputElement).value)
+		};
+		try {
+			localStorage.setItem(CD_STORAGE_KEY, JSON.stringify(data));
+		} catch {
+			/* localStorage unavailable */
+		}
+	}
+
+	function loadCdData() {
+		try {
+			const raw = localStorage.getItem(CD_STORAGE_KEY);
+			if (!raw) return;
+			const data = JSON.parse(raw);
+			const $gameSpeed = $('#local-game-speed') as HTMLInputElement | null;
+			const $timeFlux = $('#time-flux') as HTMLSelectElement | null;
+			const $gameStage = $('#game-stage') as HTMLSelectElement | null;
+			if ($gameSpeed && data.localGameSpeed != null) $gameSpeed.value = String(data.localGameSpeed);
+			if ($timeFlux && data.timeFlux != null) $timeFlux.value = String(data.timeFlux);
+			if ($gameStage && data.gameStage != null) $gameStage.value = String(data.gameStage);
+			if (Array.isArray(data.ingameTimes)) {
+				$$('.cd-ingame-input').forEach(($input, i) => {
+					const v = data.ingameTimes[i];
+					if (v != null) ($input as HTMLInputElement).value = String(v);
+				});
+			}
+		} catch {
+			/* error loading cd data */
+		}
+	}
+
+	const $gameSpeed = $('#local-game-speed') as HTMLInputElement | null;
+	$gameSpeed?.addEventListener('input', () => {
+		const sanitized = sanitizeDecimalInput($gameSpeed.value);
+		if (sanitized !== $gameSpeed.value) $gameSpeed.value = sanitized;
+		updateAllCards();
+		saveCdData();
+	});
+	$gameSpeed?.addEventListener('change', () => {
+		updateAllCards();
+		saveCdData();
+	});
+
+	['time-flux', 'game-stage'].forEach((id) => {
+		const $control = $('#' + id) as HTMLSelectElement | null;
+		$control?.addEventListener('input', () => {
+			updateAllCards();
+			saveCdData();
+		});
+		$control?.addEventListener('change', () => {
+			updateAllCards();
+			saveCdData();
+		});
+	});
+
+	document.addEventListener('input', (e) => {
+		if ((e.target as HTMLElement).classList?.contains('cd-ingame-input')) {
+			updateAllCards();
+			saveCdData();
+		}
+	});
+	document.addEventListener('change', (e) => {
+		if ((e.target as HTMLElement).classList?.contains('cd-ingame-input')) {
+			updateAllCards();
+			saveCdData();
+		}
+	});
+
+	document.addEventListener('DOMContentLoaded', () => {
+		loadCdData();
+		updateAllCards();
+	});
+</script>

@@ -1,0 +1,705 @@
+---
+import { Field, FieldLabel } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select';
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow
+} from '@/components/ui/table';
+
+import black from '@/assets/images/gems/black.webp';
+import blue from '@/assets/images/gems/blue.webp';
+import darkPurple from '@/assets/images/gems/dark-purple.webp';
+import green from '@/assets/images/gems/green.webp';
+import lightBlue from '@/assets/images/gems/light-blue.webp';
+import orange from '@/assets/images/gems/orange.webp';
+import pink from '@/assets/images/gems/pink.webp';
+import red from '@/assets/images/gems/red.webp';
+import white from '@/assets/images/gems/white.webp';
+import yellow from '@/assets/images/gems/yellow.webp';
+import type { ImageMetadata } from 'astro';
+
+const GEM_IMAGES: ImageMetadata[] = [
+	red,
+	blue,
+	green,
+	pink,
+	yellow,
+	orange,
+	darkPurple,
+	lightBlue,
+	white,
+	black
+];
+
+const GEM_LEVELS_XP: Record<number, number> = Object.fromEntries(
+	Array.from({ length: 11 }, (_, i) => i + 2).map((level) => {
+		const base = level - 1;
+		return [level, 100 * base ** base];
+	})
+) as Record<number, number>;
+
+const GEMS = [
+	'Red',
+	'Blue',
+	'Green',
+	'Pink',
+	'Yellow',
+	'Orange',
+	'Dark Purple',
+	'Light Blue',
+	'White',
+	'Black'
+] as const;
+
+const SMP_LEVELS = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+
+const ROW_VALUES: Record<string, (string | number)[]> = {
+	'EXP Multiple': GEMS.map(() => '1')
+};
+
+const CURRENT_SMP_DEFAULTS = [5, 5, 5, 5, 5, 5, 5, 5, 5, 6];
+const DESIRED_SMP_DEFAULTS = [7, 7, 7, 7, 7, 7, 7, 7, 7, 8];
+---
+
+<div class="tower-calculator flex flex-col gap-6">
+	<div class="flex flex-row gap-4">
+		<Field class="tower-header-field">
+			<FieldLabel for="boosted-tower">Boosted Tower</FieldLabel>
+			<div class="tower-header-value flex items-center gap-2">
+				<Input
+					type="text"
+					inputmode="decimal"
+					id="boosted-tower"
+					class="w-20 bg-blue-100 dark:bg-blue-900/40"
+					value="1.827"
+					data-validate-decimal
+					autocomplete="off"
+				/>
+				<span class="text-muted-foreground text-sm">Hermit Empowered Tower Bonus</span>
+			</div>
+		</Field>
+		<Field class="tower-header-field">
+			<FieldLabel for="star-bonus">Star Bonus (Relic 45)</FieldLabel>
+			<div class="tower-header-value flex items-center gap-2">
+				<Input
+					type="text"
+					inputmode="decimal"
+					id="star-bonus"
+					class="w-20 bg-blue-100 dark:bg-blue-900/40"
+					value="6.23"
+					data-validate-decimal
+					autocomplete="off"
+				/>
+				<span class="text-muted-foreground text-sm">Current Star Bonus</span>
+			</div>
+		</Field>
+	</div>
+
+	<div class="tower-table-wrapper border-border overflow-x-auto rounded-md border">
+		<Table class="tower-table min-w-[800px] border-collapse">
+			<TableHeader>
+				<TableRow class="border-0 hover:bg-transparent">
+					<TableHead class="border-border w-40 min-w-[140px] border bg-transparent font-medium" />
+					{
+						GEMS.map((gem, i) => (
+							<TableHead
+								class="border-border border bg-blue-900/80 px-2 py-3 text-center text-sm font-medium text-blue-50 dark:bg-blue-950/90"
+								scope="col"
+							>
+								<div class="flex flex-col items-center gap-1">
+									<img
+										src={GEM_IMAGES[i].src}
+										alt={gem}
+										class="size-8 object-contain"
+										width={32}
+										height={32}
+									/>
+									<span>{gem}</span>
+								</div>
+							</TableHead>
+						))
+					}
+				</TableRow>
+			</TableHeader>
+			<TableBody>
+				<TableRow>
+					<TableCell class="border-border bg-muted/50 border font-medium">Gem Needed</TableCell>
+					{
+						GEMS.map((_, i) => (
+							<TableCell
+								class="tower-gem-needed border-border border text-center"
+								data-gem-index={i}
+								data-value="0"
+							>
+								0
+							</TableCell>
+						))
+					}
+				</TableRow>
+				<TableRow>
+					<TableCell class="border-border bg-muted/50 border font-medium">Number of Times</TableCell
+					>
+					{
+						GEMS.map((_, i) => (
+							<TableCell
+								class="tower-number-of-times border-border border text-center"
+								data-gem-index={i}
+								data-value="1"
+							>
+								1
+							</TableCell>
+						))
+					}
+				</TableRow>
+				<TableRow class="tower-row-smp-current">
+					<TableCell class="border-border border bg-blue-100/80 font-medium dark:bg-blue-900/30">
+						Current SMP Level
+					</TableCell>
+					{
+						GEMS.map((_, i) => (
+							<TableCell class="border-border border bg-blue-100/80 text-center dark:bg-blue-900/30">
+								<div class="flex justify-center">
+									<NativeSelect
+										class="tower-smp-select w-24 text-center"
+										data-gem-index={i}
+										data-smp-type="current"
+									>
+										{SMP_LEVELS.map((n) => (
+											<NativeSelectOption
+												value={String(n)}
+												selected={n === CURRENT_SMP_DEFAULTS[i]}
+											>
+												{n}
+											</NativeSelectOption>
+										))}
+									</NativeSelect>
+								</div>
+							</TableCell>
+						))
+					}
+				</TableRow>
+				<TableRow class="tower-row-smp-desired">
+					<TableCell class="border-border border bg-blue-100/80 font-medium dark:bg-blue-900/30">
+						Desired SMP Level
+					</TableCell>
+					{
+						GEMS.map((_, i) => (
+							<TableCell class="border-border border bg-blue-100/80 text-center dark:bg-blue-900/30">
+								<div class="flex justify-center">
+									<NativeSelect
+										class="tower-smp-select w-24 text-center"
+										data-gem-index={i}
+										data-smp-type="desired"
+									>
+										{SMP_LEVELS.map((n) => (
+											<NativeSelectOption
+												value={String(n)}
+												selected={n === DESIRED_SMP_DEFAULTS[i]}
+											>
+												{n}
+											</NativeSelectOption>
+										))}
+									</NativeSelect>
+								</div>
+							</TableCell>
+						))
+					}
+				</TableRow>
+				<TableRow>
+					<TableCell class="border-border border bg-blue-100/80 font-medium dark:bg-blue-900/30"
+						>Current EXP</TableCell
+					>
+					{
+						GEMS.map((_, i) => (
+							<TableCell class="tower-current-exp-cell border-border border bg-blue-100/80 text-center data-[invalid=true]:border-red-500 data-[invalid=true]:bg-red-50/50 dark:bg-blue-900/30 dark:data-[invalid=true]:border-red-900 dark:data-[invalid=true]:bg-red-950/30">
+								<Input
+									type="text"
+									inputmode="numeric"
+									class="tower-current-exp mx-auto w-24 text-center"
+									data-gem-index={i}
+									data-validate-integer
+									placeholder="0"
+									value="0"
+									autocomplete="off"
+								/>
+							</TableCell>
+						))
+					}
+				</TableRow>
+				<TableRow>
+					<TableCell class="border-border bg-muted/50 border font-medium">EXP Multiple</TableCell>
+					{
+						ROW_VALUES['EXP Multiple'].map((val, i) => (
+							<TableCell
+								class="tower-exp-multiple border-border border text-center"
+								data-gem-index={i}
+								data-value={val}
+							>
+								{val}
+							</TableCell>
+						))
+					}
+				</TableRow>
+				<TableRow>
+					<TableCell class="border-border bg-muted/50 border font-medium"
+						>Total Current EXP</TableCell
+					>
+					{
+						GEMS.map((_, i) => (
+							<TableCell class="border-border border text-center">
+								<span class="tower-total-current-exp" data-gem-index={i}>
+									0
+								</span>
+							</TableCell>
+						))
+					}
+				</TableRow>
+				<TableRow>
+					<TableCell class="border-border bg-muted/50 border font-medium">Needed</TableCell>
+					{
+						GEMS.map((_, i) => (
+							<TableCell class="border-border border text-center">
+								<span class="tower-needed" data-gem-index={i}>
+									0
+								</span>
+							</TableCell>
+						))
+					}
+				</TableRow>
+				<TableRow>
+					<TableCell class="border-border bg-muted/50 border font-medium"
+						>Tower Power Needed</TableCell
+					>
+					{
+						GEMS.map((_, i) => (
+							<TableCell class="border-border border text-center">
+								<span class="tower-power-needed" data-gem-index={i}>
+									0
+								</span>
+							</TableCell>
+						))
+					}
+				</TableRow>
+				<TableRow>
+					<TableCell class="border-border bg-muted/50 border font-medium"
+						>Star Bonus Needed</TableCell
+					>
+					{
+						GEMS.map((_, i) => (
+							<TableCell class="border-border border text-center">
+								<span class="tower-star-bonus-needed" data-gem-index={i}>
+									0
+								</span>
+							</TableCell>
+						))
+					}
+				</TableRow>
+				<TableRow>
+					<TableCell class="border-border bg-muted/50 border font-medium"
+						>Additional Merge EXP</TableCell
+					>
+					{
+						GEMS.map((_, i) => (
+							<TableCell class="border-border border text-center">
+								<span class="tower-additional-merge-exp" data-gem-index={i}>
+									0
+								</span>
+							</TableCell>
+						))
+					}
+				</TableRow>
+			</TableBody>
+		</Table>
+	</div>
+</div>
+
+<script define:vars={{ gemLevelsXp: GEM_LEVELS_XP }}>
+	const $ = (sel) => document.querySelector(sel);
+	const $$ = (sel) => document.querySelectorAll(sel);
+
+	const DECIMAL_REGEX = /^\d*\.?\d*$/;
+
+	function isValidDecimal(value) {
+		if (value.trim() === '') return true;
+		return DECIMAL_REGEX.test(value.trim());
+	}
+
+	function sanitizeDecimalInput(value) {
+		const digitsAndDot = value.replace(/[^0-9.]/g, '');
+		const parts = digitsAndDot.split('.');
+		if (parts.length <= 2) return digitsAndDot;
+		return parts[0] + '.' + parts.slice(1).join('');
+	}
+
+	function validateTowerInput(input) {
+		const $field = input.closest('[data-slot="field"]');
+		if (!$field) return;
+		const valid = isValidDecimal(input.value);
+		if (valid) {
+			$field.removeAttribute('data-invalid');
+		} else {
+			$field.setAttribute('data-invalid', 'true');
+		}
+	}
+
+	const INTEGER_REGEX = /^\d*$/;
+
+	function isValidInteger(value) {
+		return INTEGER_REGEX.test(value);
+	}
+
+	function sanitizeIntegerInput(value) {
+		return value.replace(/\D/g, '');
+	}
+
+	function validateCurrentExpInput(input) {
+		const $cell = input.closest('.tower-current-exp-cell');
+		if (!$cell) return;
+		const valid = isValidInteger(input.value);
+		if (valid) {
+			$cell.removeAttribute('data-invalid');
+		} else {
+			$cell.setAttribute('data-invalid', 'true');
+		}
+	}
+
+	function updateTotalCurrentExp() {
+		const $$currentExp = $$('.tower-current-exp');
+		const $$totalExp = $$('.tower-total-current-exp');
+		const $$expMultiple = $$('.tower-exp-multiple');
+		const n = $$currentExp.length;
+		if ($$totalExp.length !== n || $$expMultiple.length !== n) return;
+		for (let i = 0; i < n; i++) {
+			const current = Number(($$currentExp[i]?.value ?? '').trim()) || 0;
+			const multiple = Number($$expMultiple[i]?.dataset.value ?? 1) || 1;
+			const total = current * multiple;
+			const $total = $$totalExp[i];
+			if ($total) $total.textContent = formatInteger(total);
+		}
+		updateNeeded();
+	}
+
+	function updateNeeded() {
+		const $$currentSelects = $$('.tower-smp-select[data-smp-type="current"]');
+		const $$desiredSelects = $$('.tower-smp-select[data-smp-type="desired"]');
+		const $$totalExp = $$('.tower-total-current-exp');
+		const $$needed = $$('.tower-needed');
+		const n = $$currentSelects.length;
+		if ($$desiredSelects.length !== n || $$totalExp.length !== n || $$needed.length !== n) return;
+		for (let i = 0; i < n; i++) {
+			const currentLevel = Number($$currentSelects[i]?.value) || 2;
+			const desiredLevel = Number($$desiredSelects[i]?.value) || 2;
+			const totalCurrentExp = Number($$totalExp[i]?.textContent?.replace(/,/g, '')) || 0;
+			let needed;
+			if (desiredLevel <= currentLevel) {
+				needed = 0;
+			} else {
+				let sum = 0;
+				for (let level = currentLevel + 1; level <= desiredLevel; level++) {
+					sum += Number(gemLevelsXp[level]) || 0;
+				}
+				needed = Math.max(0, sum - totalCurrentExp);
+			}
+			const $needed = $$needed[i];
+			if ($needed) $needed.textContent = formatInteger(needed);
+		}
+		updateNumberOfTimes();
+		updateGemNeeded();
+		updateTowerPowerNeeded();
+		updateStarBonusNeeded();
+		updateAdditionalMergeExp();
+	}
+
+	function updateNumberOfTimes() {
+		const $boostedTower = $('#boosted-tower');
+		const $starBonus = $('#star-bonus');
+		const boostedTower = Number($boostedTower?.value?.replace(/,/g, '').trim()) || 0;
+		const starBonus = Number($starBonus?.value?.replace(/,/g, '').trim()) || 0;
+		const $$needed = $$('.tower-needed');
+		const $$numTimes = $$('.tower-number-of-times');
+		const n = $$needed.length;
+		if ($$numTimes.length !== n) return;
+		const boosted20 = Math.pow(boostedTower, 20);
+		for (let i = 0; i < n; i++) {
+			const needed = Number($$needed[i]?.textContent?.replace(/,/g, '')) || 0;
+			let rawGemNeeded;
+			if (needed <= 0 || boostedTower <= 0 || boostedTower === 1) {
+				rawGemNeeded = 0;
+			} else if (starBonus === 0) {
+				rawGemNeeded = Math.ceil(Math.log(needed) / Math.log(boostedTower));
+			} else {
+				const ratio = needed / starBonus;
+				rawGemNeeded = ratio <= 0 ? 0 : Math.ceil(Math.log(ratio) / Math.log(boostedTower));
+			}
+			let numberOfTimes;
+			if (rawGemNeeded > 20 && boosted20 > 0) {
+				if (starBonus === 0) {
+					numberOfTimes = Math.ceil(needed / boosted20);
+				} else {
+					numberOfTimes = Math.ceil(needed / starBonus / boosted20);
+				}
+				numberOfTimes = Math.max(1, numberOfTimes);
+			} else {
+				numberOfTimes = 1;
+			}
+			const $cell = $$numTimes[i];
+			if ($cell) {
+				$cell.textContent = String(numberOfTimes);
+				$cell.dataset.value = String(numberOfTimes);
+			}
+		}
+	}
+
+	function updateGemNeeded() {
+		const $boostedTower = $('#boosted-tower');
+		const $starBonus = $('#star-bonus');
+		const boostedTower = Number($boostedTower?.value?.replace(/,/g, '').trim()) || 0;
+		const starBonus = Number($starBonus?.value?.replace(/,/g, '').trim()) || 0;
+		const $$needed = $$('.tower-needed');
+		const $$gemNeeded = $$('.tower-gem-needed');
+		const n = $$needed.length;
+		if ($$gemNeeded.length !== n) return;
+		for (let i = 0; i < n; i++) {
+			const needed = Number($$needed[i]?.textContent?.replace(/,/g, '')) || 0;
+			let gemNeeded;
+			if (needed <= 0 || boostedTower <= 0 || boostedTower === 1) {
+				gemNeeded = 0;
+			} else if (starBonus === 0) {
+				gemNeeded = Math.ceil(Math.log(needed) / Math.log(boostedTower));
+			} else {
+				const ratio = needed / starBonus;
+				gemNeeded = ratio <= 0 ? 0 : Math.ceil(Math.log(ratio) / Math.log(boostedTower));
+			}
+			if (gemNeeded > 20) gemNeeded = 20;
+			const $cell = $$gemNeeded[i];
+			if ($cell) {
+				$cell.textContent = String(gemNeeded);
+				$cell.dataset.value = String(gemNeeded);
+			}
+		}
+	}
+
+	function updateAdditionalMergeExp() {
+		const $boostedTower = $('#boosted-tower');
+		const $starBonus = $('#star-bonus');
+		const boostedTower = Number($boostedTower?.value?.replace(/,/g, '').trim()) || 0;
+		const starBonus = Number($starBonus?.value?.replace(/,/g, '').trim()) || 0;
+		const $$needed = $$('.tower-needed');
+		const $$gemNeeded = $$('.tower-gem-needed');
+		const $$numTimes = $$('.tower-number-of-times');
+		const $$additional = $$('.tower-additional-merge-exp');
+		const n = $$needed.length;
+		if ($$gemNeeded.length !== n || $$numTimes.length !== n || $$additional.length !== n) return;
+		for (let i = 0; i < n; i++) {
+			const numberOfTimes = Number($$numTimes[i]?.dataset?.value ?? 1) || 1;
+			const $additional = $$additional[i];
+			if (!$additional) continue;
+			if (numberOfTimes === 1) {
+				$additional.textContent = 'None';
+				continue;
+			}
+			const needed = Number($$needed[i]?.textContent?.replace(/,/g, '')) || 0;
+			const gemNeeded = Number($$gemNeeded[i]?.dataset?.value ?? 20) || 1;
+			const mult = starBonus === 0 ? 1 : starBonus;
+			const subtract = mult * Math.pow(boostedTower, gemNeeded);
+			const additional = Math.max(0, needed - subtract);
+			$additional.textContent = formatInteger(additional);
+		}
+	}
+
+	function updateStarBonusNeeded() {
+		const $boostedTower = $('#boosted-tower');
+		const boostedTower = Number($boostedTower?.value?.replace(/,/g, '').trim()) || 0;
+		const $$needed = $$('.tower-needed');
+		const $$gemNeeded = $$('.tower-gem-needed');
+		const $$starBonus = $$('.tower-star-bonus-needed');
+		const n = $$needed.length;
+		if ($$gemNeeded.length !== n || $$starBonus.length !== n) return;
+		for (let i = 0; i < n; i++) {
+			const needed = Number($$needed[i]?.textContent?.replace(/,/g, '')) || 0;
+			const gemNeeded = Number($$gemNeeded[i]?.dataset?.value ?? 20) || 1;
+			let starBonusNeeded;
+			if (needed <= 0 || boostedTower <= 0) {
+				starBonusNeeded = 0;
+			} else {
+				starBonusNeeded = needed / Math.pow(boostedTower, gemNeeded);
+			}
+			const $starBonusOut = $$starBonus[i];
+			if ($starBonusOut) $starBonusOut.textContent = formatStarBonusNeeded(starBonusNeeded);
+		}
+	}
+
+	function formatStarBonusNeeded(n) {
+		if (!Number.isFinite(n) || n < 0) return '0';
+		if (n === 0) return '0';
+		return Number(n.toFixed(2)).toString();
+	}
+
+	function updateTowerPowerNeeded() {
+		const $starBonus = $('#star-bonus');
+		const starBonus = Number($starBonus?.value?.replace(/,/g, '').trim()) || 0;
+		const $$needed = $$('.tower-needed');
+		const $$gemNeeded = $$('.tower-gem-needed');
+		const $$power = $$('.tower-power-needed');
+		const n = $$needed.length;
+		if ($$gemNeeded.length !== n || $$power.length !== n) return;
+		for (let i = 0; i < n; i++) {
+			const needed = Number($$needed[i]?.textContent?.replace(/,/g, '')) || 0;
+			const gemNeeded = Number($$gemNeeded[i]?.dataset?.value ?? 20) || 1;
+			let power;
+			if (needed <= 0) {
+				power = 0;
+			} else if (starBonus === 0) {
+				power = Math.pow(needed, 1 / gemNeeded);
+			} else {
+				power = Math.pow(needed / starBonus, 1 / gemNeeded);
+			}
+			const $power = $$power[i];
+			if ($power) $power.textContent = formatTowerPower(power);
+		}
+	}
+
+	function formatTowerPower(n) {
+		if (!Number.isFinite(n) || n < 0) return '0';
+		if (n === 0) return '0';
+		return Number(n.toFixed(3)).toString();
+	}
+
+	function formatInteger(n) {
+		if (!Number.isFinite(n)) return '0';
+		return Math.round(n).toLocaleString('en-US');
+	}
+
+	const TOWER_STORAGE_KEY = 'tower-tab-data';
+
+	function saveTowerData() {
+		const $boostedTower = $('#boosted-tower');
+		const $starBonus = $('#star-bonus');
+		const boostedTower = $boostedTower?.value ?? '';
+		const starBonus = $starBonus?.value ?? '';
+		const $$currentSelects = $$('.tower-smp-select[data-smp-type="current"]');
+		const $$desiredSelects = $$('.tower-smp-select[data-smp-type="desired"]');
+		const $$currentExp = $$('.tower-current-exp');
+		const data = {
+			boostedTower,
+			starBonus,
+			currentSmpLevels: Array.from($$currentSelects).map((s) => s.value),
+			desiredSmpLevels: Array.from($$desiredSelects).map((s) => s.value),
+			currentExp: Array.from($$currentExp).map((i) => i.value)
+		};
+		try {
+			localStorage.setItem(TOWER_STORAGE_KEY, JSON.stringify(data));
+		} catch {
+			/* localStorage unavailable */
+		}
+	}
+
+	function loadTowerData() {
+		try {
+			const raw = localStorage.getItem(TOWER_STORAGE_KEY);
+			if (!raw) return;
+			const data = JSON.parse(raw);
+			const $boostedTower = $('#boosted-tower');
+			const $starBonus = $('#star-bonus');
+			if ($boostedTower && data.boostedTower != null)
+				$boostedTower.value = String(data.boostedTower);
+			if ($starBonus && data.starBonus != null) $starBonus.value = String(data.starBonus);
+			if (Array.isArray(data.currentSmpLevels)) {
+				$$('.tower-smp-select[data-smp-type="current"]').forEach((s, i) => {
+					const v = data.currentSmpLevels[i];
+					if (v != null) s.value = String(v);
+				});
+			}
+			if (Array.isArray(data.desiredSmpLevels)) {
+				$$('.tower-smp-select[data-smp-type="desired"]').forEach((s, i) => {
+					const v = data.desiredSmpLevels[i];
+					if (v != null) s.value = String(v);
+				});
+			}
+			if (Array.isArray(data.currentExp)) {
+				$$('.tower-current-exp').forEach(($input, i) => {
+					const v = data.currentExp[i];
+					if (v != null) $input.value = String(v);
+				});
+			}
+		} catch {
+			/* error loading tower data */
+		}
+	}
+
+	$$('input[data-validate-decimal]').forEach(($input) => {
+		$input.addEventListener('input', () => {
+			const sanitized = sanitizeDecimalInput($input.value);
+			if (sanitized !== $input.value) $input.value = sanitized;
+			validateTowerInput($input);
+			if ($input.id === 'star-bonus') {
+				updateNumberOfTimes();
+				updateGemNeeded();
+				updateTowerPowerNeeded();
+				updateStarBonusNeeded();
+				updateAdditionalMergeExp();
+			}
+			if ($input.id === 'boosted-tower') {
+				updateNumberOfTimes();
+				updateGemNeeded();
+				updateStarBonusNeeded();
+				updateAdditionalMergeExp();
+			}
+			saveTowerData();
+		});
+		$input.addEventListener('blur', () => {
+			validateTowerInput($input);
+			if ($input.id === 'star-bonus') {
+				updateNumberOfTimes();
+				updateGemNeeded();
+				updateTowerPowerNeeded();
+				updateStarBonusNeeded();
+				updateAdditionalMergeExp();
+			}
+			if ($input.id === 'boosted-tower') {
+				updateNumberOfTimes();
+				updateGemNeeded();
+				updateStarBonusNeeded();
+				updateAdditionalMergeExp();
+			}
+			saveTowerData();
+		});
+	});
+
+	$$('.tower-current-exp').forEach(($input) => {
+		$input.addEventListener('input', () => {
+			const sanitized = sanitizeIntegerInput($input.value);
+			if (sanitized !== $input.value) $input.value = sanitized;
+			validateCurrentExpInput($input);
+			updateTotalCurrentExp();
+			saveTowerData();
+		});
+		$input.addEventListener('blur', () => {
+			validateCurrentExpInput($input);
+			saveTowerData();
+		});
+	});
+
+	$$('.tower-smp-select').forEach(($select) => {
+		$select.addEventListener('change', () => {
+			updateNeeded();
+			saveTowerData();
+		});
+	});
+
+	document.addEventListener('DOMContentLoaded', () => {
+		loadTowerData();
+		$$('.tower-current-exp').forEach(validateCurrentExpInput);
+		updateTotalCurrentExp();
+		updateNeeded();
+		updateGemNeeded();
+		updateTowerPowerNeeded();
+		updateStarBonusNeeded();
+		updateAdditionalMergeExp();
+	});
+</script>

@@ -1,11 +1,31 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import CooldownCalculator from '@/components/pages/CooldownCalculator.astro';
+import DeathCalculator from '@/components/pages/DeathCalculator.astro';
+import TowerCalculator from '@/components/pages/TowerCalculator.astro';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tile } from '@/components/ui/tile';
+import Layout from '@/layouts/Layout.astro';
 ---
 
 <Layout>
-	<Welcome />
+	<Tabs defaultValue="tower-tab">
+		<TabsList>
+			<TabsTrigger value="tower-tab">Tower</TabsTrigger>
+			<TabsTrigger value="cd-tab">Cooldown</TabsTrigger>
+			<TabsTrigger value="death-tab">Death</TabsTrigger>
+		</TabsList>
+		<Tile variant="floating">
+			<article class="w-full">
+				<TabsContent value="tower-tab">
+					<TowerCalculator />
+				</TabsContent>
+				<TabsContent value="cd-tab">
+					<CooldownCalculator />
+				</TabsContent>
+				<TabsContent value="death-tab">
+					<DeathCalculator />
+				</TabsContent>
+			</article>
+		</Tile>
+	</Tabs>
 </Layout>

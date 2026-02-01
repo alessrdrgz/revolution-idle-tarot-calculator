@@ -1,3 +1,9 @@
+---
+import PageHeader from '@/components/PageHeader.astro';
+import { ThemeProvider } from '@/components/ui/theme-toggle';
+import '@/styles/global.css';
+---
+
 <!doctype html>
 <html lang="en">
 	<head>
@@ -6,18 +12,16 @@
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="icon" href="/favicon.ico" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Astro Basics</title>
+		<title>Revolution Idle - Tarot Calculator</title>
+
+		<ThemeProvider />
 	</head>
-	<body>
-		<slot />
+	<body
+		class="min-h-screen bg-gradient-to-br from-stone-50 via-blue-50/60 to-stone-100 dark:from-stone-950 dark:via-blue-950/40 dark:to-slate-950/50"
+	>
+		<PageHeader />
+		<main class="px-20 py-10">
+			<slot />
+		</main>
 	</body>
 </html>
-
-<style>
-	html,
-	body {
-		margin: 0;
-		width: 100%;
-		height: 100%;
-	}
-</style>

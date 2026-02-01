@@ -1,46 +1,19 @@
-# Astro Starter Kit: Basics
+# Tarot Calculator
 
-```sh
-pnpm create astro@latest -- --template basics
-```
+[![version](https://img.shields.io/badge/version-0.0.1-blue)](./package.json)
+[![game](https://img.shields.io/badge/game-Revolution%20Idle-green)](https://store.steampowered.com/app/521140/Revolution_Idle/)
+[![Astro](https://img.shields.io/badge/Astro-5.17-FF5D01)](https://astro.build)
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+Web app with calculators for **Revolution Idle**: **Tower** (SMP level), **Cooldown** (tarots cooldowns in real time), and **Death** (refine points).
 
-## 🚀 Project Structure
+Your inputs in each tab are saved in the browser and restored on reload.
 
-Inside of your Astro project, you'll see the following folders and files:
+## Calculators
 
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
-└── package.json
-```
+- **Tower** — Tower arcana gem level calculator.
+- **Cooldown** — Tarot cooldowns in realm time and also tier lists for different game stages.
+- **Death** — Death boost result.
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+## Credits
 
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `pnpm install`             | Installs dependencies                            |
-| `pnpm dev`             | Starts local dev server at `localhost:4321`      |
-| `pnpm build`           | Build your production site to `./dist/`          |
-| `pnpm preview`         | Preview your build locally, before deploying     |
-| `pnpm astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `pnpm astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+Formulas and calculator logic come from the **original spreadsheet** by **.moneyprinter** on Discord. Thanks for sharing it.

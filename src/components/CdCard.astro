@@ -1,0 +1,73 @@
+---
+import TarotCard from '@/components/TarotCard.astro';
+import { Input } from '@/components/ui/input';
+import type { TarotCooldownCard } from '@/lib/tarotCooldownData';
+import { formatCooldown } from '@/lib/tarotCooldownData';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+	card: TarotCooldownCard;
+	image: ImageMetadata;
+}
+
+const { card, image } = Astro.props;
+const ingameFormatted = formatCooldown(card.hours, card.minutes, card.seconds);
+---
+
+<div
+	class="flex flex-col gap-2 rounded-lg p-3"
+	data-cd-card
+	data-tiers={JSON.stringify(card.tiers)}
+>
+	<TarotCard
+		image={image}
+		alt={card.name}
+		width={200}
+		height={200}
+		tarotRomanNumber={card.romanNumber}
+		tarotName={card.name}
+	/>
+
+	<div class="text-center text-sm">
+		<label for={`cd-ingame-${card.index}`} class="sr-only">Ingame time</label>
+		<Input
+			type="text"
+			id={`cd-ingame-${card.index}`}
+			class="cd-ingame-input w-full max-w-full text-center text-sm"
+			placeholder="H:MM:SS"
+			value={ingameFormatted}
+			autocomplete="off"
+		/>
+	</div>
+	<div class="text-center text-sm">
+		<span class="font-medium">Real time:</span>
+		<span class="cd-real-time">--:--:--</span>
+	</div>
+	<div class="flex justify-center">
+		<span class="cd-tier rounded px-2 py-0.5 text-xs font-bold text-white" data-tier-placeholder>
+			-
+		</span>
+	</div>
+</div>
+
+<style>
+	.cd-tier.tier-spp {
+		background-color: #6366f1;
+	}
+	.cd-tier.tier-sp {
+		background-color: #8b5cf6;
+	}
+	.cd-tier.tier-a {
+		background-color: #22c55e;
+	}
+	.cd-tier.tier-b {
+		background-color: #eab308;
+		color: #1c1917;
+	}
+	.cd-tier.tier-c {
+		background-color: #f97316;
+	}
+	.cd-tier.tier-f {
+		background-color: #ef4444;
+	}
+</style>

@@ -1,0 +1,21 @@
+---
+import type { HTMLAttributes } from "astro/types"
+
+import { cn } from "@/lib/utils"
+
+interface Props extends HTMLAttributes<"tfoot"> {}
+
+const { class: className, ...props } = Astro.props
+---
+
+<tfoot
+  data-slot="table-footer"
+  class={cn(
+    "bg-neutral-100/50 border-t font-medium [&>tr]:last:border-b-0 dark:bg-neutral-800/50",
+    className
+  )}
+  {...props}
+>
+  <slot />
+</tfoot>
+
